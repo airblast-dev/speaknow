@@ -21,7 +21,7 @@ struct SnMessage *sn_new_message(uint32_t capacity) {
     ESP_LOGW(__func__, "requested capacity exceeds");
     return NULL;
   }
-  void *mptr = aligned_alloc(alignof(uint32_t), struct_capacity);
+  void *mptr = aligned_alloc(alignof(struct SnMessage *), struct_capacity);
   if (mptr == NULL) {
     ESP_LOGE(__func__,
              "failed to allocate space for new message with %" PRIu32

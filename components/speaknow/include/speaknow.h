@@ -13,18 +13,25 @@ enum SnVersion {
   { 0x68, 0x87, 0x00, 0x12, 0x01, 0x34, 0x82, 0xFF }
 const static uint8_t SN_MAGIC[8] = SN_MAGIC_BYTES;
 
-struct __attribute__((aligned(alignof(uint32_t)), packed)) SnMessage {
+/* START OF MESSAGE DEFS
+ * START OF MESSAGE DEFS
+ * START OF MESSAGE DEFS
+ * START OF MESSAGE DEFS
+ */
+
+struct __attribute__((aligned(alignof(struct SnMessage *)), packed)) SnMessage {
+  struct SnMessage *next;
   uint32_t capacity;
   uint32_t data_len;
   const uint8_t magic[8];
   const enum SnVersion version;
   uint8_t data[] __attribute__((counted_by(data_len)));
 };
-_Static_assert(sizeof(struct SnMessage) == sizeof(uint32_t) * 2 +
-                                               sizeof(uint8_t[8]) +
-                                               sizeof(enum SnVersion),
+_Static_assert(sizeof(struct SnMessage) ==
+                   sizeof(uint32_t) * 2 + sizeof(uint8_t[8]) +
+                       sizeof(enum SnVersion) + sizeof(struct SnMessage *),
                "bad speaknow message size");
-_Static_assert(alignof(struct SnMessage) == alignof(uint32_t),
+_Static_assert(alignof(struct SnMessage) == alignof(struct SnMessage *),
                "bad speaknow message alignment");
 
 // The maximum number of bytes than can be sent in a single message
@@ -40,4 +47,13 @@ __attribute__((malloc)) struct SnMessage *sn_new_message(uint32_t capacity);
 __attribute__((always_inline, nonnull(1),
                returns_nonnull)) static inline uint8_t *
 sn_message_copy_point(const struct SnMessage *snm);
+
+/* END OF MESSAGE DEFS
+ * END OF MESSAGE DEFS
+ * END OF MESSAGE DEFS
+ * END OF MESSAGE DEFS
+ */
+
+struct SnMessageBuilder {};
+
 #endif

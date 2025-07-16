@@ -27,3 +27,11 @@ TEST_CASE("create_message_capacity_overflow",
   struct SnMessage *msg = sn_new_message(UINT32_MAX - 1);
   TEST_ASSERT_NULL(msg);
 }
+
+TEST_CASE("create_message_builder_zero_capacity",
+          "create a zero capacity message builder") {
+  struct SnMessageBuilder b;
+  TEST_ASSERT_EQUAL_UINT8_MESSAGE(0, sn_new_message_builder(0, &b),
+                                  "failed to allocate space for message");
+  TEST_ASSERT_NULL(b.messages->next);
+}

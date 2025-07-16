@@ -39,3 +39,42 @@ struct SnMessage *sn_new_message(uint32_t capacity) {
 uint8_t *sn_message_copy_point(const struct SnMessage *snm) {
   return (uint8_t *)&snm->data_len;
 }
+
+uint8_t sn_new_message_builder(uint32_t capacity,
+                               struct SnMessageBuilder *restrict builder) {
+  static const struct SnMessageBuilder EMPTY_MESSAGE_BUILDER = {
+      .message_count = 1, .total_data_len = 0, .messages = NULL};
+  memcpy(builder, &EMPTY_MESSAGE_BUILDER, sizeof(struct SnMessageBuilder));
+
+  if (capacity > SN_MAX_MESSAGE_LEN) {
+    capacity -= SN_MAX_MESSAGE_LEN;
+    builder->messages = sn_new_message(SN_MAX_MESSAGE_LEN);
+    if (builder->messages == NULL) {
+      goto error;
+    }
+    builder->message_count++;
+  }
+
+  struct SnMessage *cur = builder->messages;
+  do {
+    if (cur == NULL) {
+      goto error;
+    }
+    capacity -= SN_MAX_MESSAGE_LEN;
+    cur->next = sn_new_message(SN_MAX_MESSAGE_LEN);
+    cur = cur->next;
+
+  } while (capacity > SN_MAX_MESSAGE_LEN);
+
+  return 0;
+
+error:
+  cur = builder->messages;
+  struct SnMessage *next;
+  while (cur != NULL) {
+    next = cur->next;
+    free(cur);
+    cur = next;
+  }
+  return -1;
+}

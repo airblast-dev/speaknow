@@ -36,7 +36,7 @@ _Static_assert(alignof(struct SnMessage) == alignof(struct SnMessage *),
 
 // The maximum number of bytes than can be sent in a single message
 static const uint32_t SN_MAX_MESSAGE_LEN =
-    ESP_NOW_MAX_DATA_LEN - sizeof(struct SnMessage);
+    ESP_NOW_MAX_DATA_LEN_V2 - sizeof(struct SnMessage);
 
 // @brief Create a new message with the provided capacity
 //

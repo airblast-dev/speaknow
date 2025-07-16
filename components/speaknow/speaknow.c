@@ -36,5 +36,5 @@ struct SnMessage *sn_new_message(uint32_t capacity) {
 }
 
 uint8_t *sn_message_copy_point(const struct SnMessage *snm) {
-  return (uint8_t *)&snm->magic;
+  return (uint8_t *)&snm->data_len;
 }

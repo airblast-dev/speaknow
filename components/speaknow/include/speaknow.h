@@ -54,6 +54,11 @@ sn_message_copy_point(const struct SnMessage *snm);
  * END OF MESSAGE DEFS
  */
 
-struct SnMessageBuilder {};
+struct SnMessageBuilder {
+  // Singly linked list of messages
+  struct SnMessage *messages;
+  uint32_t total_data_len;
+  uint16_t message_count;
+};
 
 #endif

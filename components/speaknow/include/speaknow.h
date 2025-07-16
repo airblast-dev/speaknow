@@ -1,3 +1,6 @@
+#ifndef RIGHTNOW2_COMPONENTS_RIGHTNOW2_SPEAKNOW_H
+#define RIGHTNOW2_COMPONENTS_RIGHTNOW2_SPEAKNOW_H
+
 #include "esp_now.h"
 #include <stdalign.h>
 #include <stdint.h>
@@ -28,7 +31,11 @@ _Static_assert(alignof(struct SnMessage) == alignof(uint32_t),
 static const uint32_t SN_MAX_MESSAGE_LEN =
     ESP_NOW_MAX_DATA_LEN - sizeof(struct SnMessage);
 
+// @brief Create a new message with the provided capacity
+//
+// @params
 __attribute__((malloc)) struct SnMessage *sn_new_message(uint32_t capacity);
 
 __attribute__((always_inline)) static inline uint8_t *
 sn_message_copy_point(const struct SnMessage *snm);
+#endif

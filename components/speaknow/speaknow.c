@@ -8,7 +8,7 @@
 #include <string.h>
 
 struct SnMessage *sn_new_message(uint32_t capacity) {
-  ESP_LOGI(__func__, "creating new message");
+  ESP_LOGI(__func__, "creating new message with %" PRIu32 " capacity");
   const static struct SnMessage EMPTY_MESSAGE = {
       .capacity = 0, .magic = SN_MAGIC_BYTES, .version = SnV1};
   uint32_t struct_capacity = sizeof(struct SnMessage) + capacity;

@@ -61,4 +61,8 @@ struct SnMessageBuilder {
   uint16_t message_count;
 };
 
+__attribute__((access(write_only, 2), nonnull(2))) uint8_t
+sn_new_message_builder(uint32_t capacity,
+                       struct SnMessageBuilder *restrict builder);
+
 #endif

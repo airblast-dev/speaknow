@@ -16,6 +16,10 @@ struct SnMessage *sn_new_message(uint32_t capacity) {
     ESP_LOGE(__func__, "requested message capacity exceeds max 32 bit integer");
     return NULL;
   }
+  if (new_cap > SN_MAX_MESSAGE_LEN) {
+    ESP_LOGW(__func__, "requested capacity exceeds");
+    return NULL;
+  }
   void *mptr = aligned_alloc(alignof(uint32_t), new_cap);
   if (mptr == NULL) {
     ESP_LOGE(__func__,

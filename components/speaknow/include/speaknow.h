@@ -1,7 +1,6 @@
 #ifndef RIGHTNOW2_COMPONENTS_RIGHTNOW2_SPEAKNOW_H
 #define RIGHTNOW2_COMPONENTS_RIGHTNOW2_SPEAKNOW_H
 
-#include "esp_now.h"
 #include <stdalign.h>
 #include <stdint.h>
 
@@ -9,6 +8,7 @@ enum SnVersion {
   SnV1,
 };
 
+#define INTERNAL_SPEAKNOW_ESP_NOW_MAX_LEN_V2 1470
 #define SN_MAGIC_BYTES                                                         \
   { 0x68, 0x87, 0x00, 0x12, 0x01, 0x34, 0x82, 0xFF }
 const static uint8_t SN_MAGIC[8] = SN_MAGIC_BYTES;
@@ -19,7 +19,7 @@ const static uint8_t SN_MAGIC[8] = SN_MAGIC_BYTES;
  * START OF MESSAGE DEFS
  */
 
-struct __attribute__((aligned(alignof(struct SnMessage *)), packed)) SnMessage {
+struct __attribute__((packed)) SnMessage {
   struct SnMessage *next;
   uint32_t capacity;
   uint32_t data_len;
@@ -31,12 +31,13 @@ _Static_assert(sizeof(struct SnMessage) ==
                    sizeof(uint32_t) * 2 + sizeof(uint8_t[8]) +
                        sizeof(enum SnVersion) + sizeof(struct SnMessage *),
                "bad speaknow message size");
-_Static_assert(alignof(struct SnMessage) == alignof(struct SnMessage *),
+// TODO fix alignment stuff
+_Static_assert(alignof(struct SnMessage) == 1,
                "bad speaknow message alignment");
 
 // The maximum number of bytes than can be sent in a single message
 static const uint32_t SN_MAX_MESSAGE_LEN =
-    ESP_NOW_MAX_DATA_LEN_V2 - sizeof(struct SnMessage);
+    INTERNAL_SPEAKNOW_ESP_NOW_MAX_LEN_V2 - sizeof(struct SnMessage);
 
 // @brief Create a new message with the provided capacity
 //
@@ -65,4 +66,5 @@ __attribute__((access(write_only, 2), nonnull(2))) uint8_t
 sn_new_message_builder(uint32_t capacity,
                        struct SnMessageBuilder *restrict builder);
 
+#undef INTERNAL_SPEAKNOW_ESP_NOW_MAX_LEN_V2
 #endif

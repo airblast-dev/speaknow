@@ -1,6 +1,5 @@
 #include "speaknow.h"
 #include "esp_log.h"
-#include "esp_now.h"
 #include "stdlib.h"
 #include <inttypes.h>
 #include <stdalign.h>
@@ -8,8 +7,11 @@
 #include <stdio.h>
 #include <string.h>
 
-struct SnMessage *sn_new_message(uint32_t capacity) {
-  ESP_LOGI(__func__, "creating new message with %" PRIu32 " capacity");
+#define ESP_NOW_MAX_DATA_LEN_V2 1470
+__attribute__((assume_aligned(alignof(void *)))) struct SnMessage *
+sn_new_message(uint32_t capacity) {
+  ESP_LOGI(__func__, "creating new message with %" PRIu32 " capacity",
+           capacity);
   const static struct SnMessage EMPTY_MESSAGE = {
       .capacity = 0, .magic = SN_MAGIC_BYTES, .version = SnV1};
   uint32_t struct_capacity = sizeof(struct SnMessage) + capacity;
@@ -22,7 +24,7 @@ struct SnMessage *sn_new_message(uint32_t capacity) {
     ESP_LOGW(__func__, "requested capacity exceeds ESP NOW data length limit");
     return NULL;
   }
-  void *mptr = aligned_alloc(alignof(struct SnMessage *), struct_capacity);
+  void *mptr = aligned_alloc(alignof(void *), struct_capacity);
   if (mptr == NULL) {
     ESP_LOGE(__func__,
              "failed to allocate space for new message with %" PRIu32
@@ -37,7 +39,7 @@ struct SnMessage *sn_new_message(uint32_t capacity) {
   return snm_ptr;
 }
 
-uint8_t *sn_message_copy_point(const struct SnMessage *snm) {
+inline uint8_t *sn_message_copy_point(const struct SnMessage *snm) {
   return (uint8_t *)&snm->data_len;
 }
 
@@ -54,8 +56,6 @@ uint8_t sn_new_message_builder(uint32_t capacity,
     builder->messages = sn_new_message(capacity);
     capacity = 0;
   }
-  builder->messages = sn_new_message(
-      SN_MAX_MESSAGE_LEN >= capacity ? capacity : SN_MAX_MESSAGE_LEN);
 
   struct SnMessage *cur = builder->messages;
   while (capacity >= SN_MAX_MESSAGE_LEN) {

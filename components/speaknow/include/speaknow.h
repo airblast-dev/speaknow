@@ -36,6 +36,8 @@ static const uint32_t SN_MAX_MESSAGE_LEN =
 // @params
 __attribute__((malloc)) struct SnMessage *sn_new_message(uint32_t capacity);
 
-__attribute__((always_inline)) static inline uint8_t *
+// @brief Returns a pointer to the portion of the message that will be sent
+__attribute__((always_inline, nonnull(1),
+               returns_nonnull)) static inline uint8_t *
 sn_message_copy_point(const struct SnMessage *snm);
 #endif

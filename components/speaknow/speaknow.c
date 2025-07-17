@@ -61,12 +61,13 @@ uint8_t sn_message_builder_new(uint32_t capacity,
       .message_count = 1, .total_data_len = 0, .messages = NULL};
   memcpy(builder, &EMPTY_MESSAGE_BUILDER, sizeof(struct SnMessageBuilder));
 
-  if (SN_MAX_MESSAGE_LEN <= capacity) {
+  if (SN_MAX_MESSAGE_LEN < capacity) {
     builder->messages = sn_message_new(SN_MAX_MESSAGE_LEN);
     capacity -= SN_MAX_MESSAGE_LEN;
   } else {
     builder->messages = sn_message_new(capacity);
     capacity = 0;
+    return builder->messages == NULL;
   }
 
   struct SnMessage *cur = builder->messages;

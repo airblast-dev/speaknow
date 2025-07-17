@@ -72,7 +72,7 @@ struct SnMessageBuilder {
 };
 
 __attribute__((access(write_only, 2), nonnull(2))) uint8_t
-sn_new_message_builder(uint32_t capacity,
+sn_message_builder_new(uint32_t capacity,
                        struct SnMessageBuilder *restrict builder);
 
 #undef INTERNAL_SPEAKNOW_ESP_NOW_MAX_LEN_V2

@@ -38,7 +38,7 @@ struct SnMessage *sn_message_new(uint32_t capacity) {
   return snm_ptr;
 }
 
-void sn_destroy_message_chain(struct SnMessage *restrict snm) {
+void sn_message_destroy_chain(struct SnMessage *restrict snm) {
   struct SnMessage *snm_next;
   struct SnMessage *snm_cur = snm;
 
@@ -49,13 +49,13 @@ void sn_destroy_message_chain(struct SnMessage *restrict snm) {
   } while (snm_cur != NULL);
 }
 
-void sn_dealloc_current(struct SnMessage **restrict snm) {
+void sn_dealloc_current_message(struct SnMessage **restrict snm) {
   struct SnMessage *to_free = *snm;
   *snm = (*snm)->next;
   free(to_free);
 }
 
-uint8_t sn_new_message_builder(uint32_t capacity,
+uint8_t sn_message_builder_new(uint32_t capacity,
                                struct SnMessageBuilder *restrict builder) {
   static const struct SnMessageBuilder EMPTY_MESSAGE_BUILDER = {
       .message_count = 1, .total_data_len = 0, .messages = NULL};

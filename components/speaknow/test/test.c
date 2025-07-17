@@ -32,7 +32,7 @@ TEST_CASE("create_message_capacity_overflow",
 TEST_CASE("create_message_builder_zero_capacity",
           "create a zero capacity message builder") {
   struct SnMessageBuilder b;
-  TEST_ASSERT_EQUAL_UINT8_MESSAGE(0, sn_new_message_builder(0, &b),
+  TEST_ASSERT_EQUAL_UINT8_MESSAGE(0, sn_message_builder_new(0, &b),
                                   "failed to allocate space for message");
   TEST_ASSERT_NOT_NULL(b.messages);
   TEST_ASSERT_NULL(b.messages->next);
@@ -44,7 +44,7 @@ TEST_CASE("create_message_builder_under_limit_capacity",
           "create a message builder with capacity slightly less than the "
           "maximum for a single message") {
   struct SnMessageBuilder b;
-  TEST_ASSERT_EQUAL_UINT8_MESSAGE(0, sn_new_message_builder(900, &b),
+  TEST_ASSERT_EQUAL_UINT8_MESSAGE(0, sn_message_builder_new(900, &b),
                                   "failed to allocate space for message");
   TEST_ASSERT_NOT_NULL(b.messages);
   TEST_ASSERT_EQUAL_UINT32(900, b.messages->capacity);
@@ -57,7 +57,7 @@ TEST_CASE("create_message_builder_over_limit_capacity",
           "single message") {
   struct SnMessageBuilder b;
   TEST_ASSERT_EQUAL_UINT8_MESSAGE(
-      0, sn_new_message_builder(SN_MAX_MESSAGE_LEN * 3, &b),
+      0, sn_message_builder_new(SN_MAX_MESSAGE_LEN * 3, &b),
       "failed to allocate space for message");
 
   TEST_ASSERT_NOT_NULL(b.messages);

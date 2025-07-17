@@ -42,12 +42,21 @@ static const uint32_t SN_MAX_MESSAGE_LEN =
 // @brief Create a new message with the provided capacity
 //
 // @params
-__attribute__((malloc)) struct SnMessage *sn_new_message(uint32_t capacity);
+__attribute__((malloc,
+               assume_aligned(alignof(struct SnMessage *)))) struct SnMessage *
+sn_message_new(uint32_t capacity);
+__attribute__((nonnull(1))) void
+sn_message_destroy_chain(struct SnMessage *restrict snm);
+__attribute__((nonnull(1), always_inline)) void
+sn_message_dealloc_current(struct SnMessage **restrict snm);
 
 // @brief Returns a pointer to the portion of the message that will be sent
 __attribute__((always_inline, nonnull(1),
                returns_nonnull)) static inline uint8_t *
 sn_message_copy_point(const struct SnMessage *snm);
+inline uint8_t *sn_message_copy_point(const struct SnMessage *snm) {
+  return (uint8_t *)&snm->data_len;
+}
 
 /* END OF MESSAGE DEFS
  * END OF MESSAGE DEFS

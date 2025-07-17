@@ -8,8 +8,7 @@
 #include <string.h>
 
 #define ESP_NOW_MAX_DATA_LEN_V2 1470
-__attribute__((assume_aligned(alignof(void *)))) struct SnMessage *
-sn_new_message(uint32_t capacity) {
+struct SnMessage *sn_message_new(uint32_t capacity) {
   ESP_LOGI(__func__, "creating new message with %" PRIu32 " capacity",
            capacity);
   const static struct SnMessage EMPTY_MESSAGE = {
@@ -24,7 +23,7 @@ sn_new_message(uint32_t capacity) {
     ESP_LOGW(__func__, "requested capacity exceeds ESP NOW data length limit");
     return NULL;
   }
-  void *mptr = aligned_alloc(alignof(void *), struct_capacity);
+  void *mptr = aligned_alloc(alignof(struct SnMessage *), struct_capacity);
   if (mptr == NULL) {
     ESP_LOGE(__func__,
              "failed to allocate space for new message with %" PRIu32
@@ -39,8 +38,21 @@ sn_new_message(uint32_t capacity) {
   return snm_ptr;
 }
 
-inline uint8_t *sn_message_copy_point(const struct SnMessage *snm) {
-  return (uint8_t *)&snm->data_len;
+void sn_destroy_message_chain(struct SnMessage *restrict snm) {
+  struct SnMessage *snm_next;
+  struct SnMessage *snm_cur = snm;
+
+  do {
+    snm_next = snm_cur->next;
+    free(snm_cur);
+    snm_cur = snm_next;
+  } while (snm_cur != NULL);
+}
+
+void sn_dealloc_current(struct SnMessage **restrict snm) {
+  struct SnMessage *to_free = *snm;
+  *snm = (*snm)->next;
+  free(to_free);
 }
 
 uint8_t sn_new_message_builder(uint32_t capacity,
@@ -50,10 +62,10 @@ uint8_t sn_new_message_builder(uint32_t capacity,
   memcpy(builder, &EMPTY_MESSAGE_BUILDER, sizeof(struct SnMessageBuilder));
 
   if (SN_MAX_MESSAGE_LEN <= capacity) {
-    builder->messages = sn_new_message(SN_MAX_MESSAGE_LEN);
+    builder->messages = sn_message_new(SN_MAX_MESSAGE_LEN);
     capacity -= SN_MAX_MESSAGE_LEN;
   } else {
-    builder->messages = sn_new_message(capacity);
+    builder->messages = sn_message_new(capacity);
     capacity = 0;
   }
 
@@ -61,7 +73,7 @@ uint8_t sn_new_message_builder(uint32_t capacity,
   while (capacity >= SN_MAX_MESSAGE_LEN) {
     capacity -= SN_MAX_MESSAGE_LEN;
     ESP_LOGI(__func__, "allocating next message for builder");
-    cur->next = sn_new_message(SN_MAX_MESSAGE_LEN);
+    cur->next = sn_message_new(SN_MAX_MESSAGE_LEN);
     if (cur->next == NULL) {
       ESP_LOGE(__func__, "allocating next message for builder failed");
       goto error;
@@ -70,7 +82,7 @@ uint8_t sn_new_message_builder(uint32_t capacity,
   }
 
   if (capacity > 0) {
-    cur->next = sn_new_message(capacity);
+    cur->next = sn_message_new(capacity);
     if (cur->next == NULL) {
       ESP_LOGE(__func__, "allocating leftover bytes failed (%" PRIu32 ")",
                capacity);
